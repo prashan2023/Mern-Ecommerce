@@ -39,4 +39,47 @@ const createUser = asyncHandler(async(req,res) =>{
 
 });
 
-export {createUser}
+const loginUser = asyncHandler(async(req,res) =>{
+       const {email,password} = req.body;
+
+       const existingUser = await User.findOne({email});
+       if(existingUser){
+          const isPasswordValid = await bcrypt.compare(password,existingUser.password);
+
+          if(isPasswordValid){
+            try {
+              generateToken(res, existingUser._id);
+
+              res.status(201).json({
+                _id: existingUser._id,
+                username: existingUser.username,
+                email: existingUser.email,
+                password: existingUser.password,
+                isAdmin: existingUser.isAdmin
+              });
+              return;
+            }catch(error) {
+                res.status(401)
+                throw new Error("Invalid User credential");
+            }
+          
+          }
+       }else{
+            res.status(400).send("Invalid User credentials.")
+       }
+});
+
+const logoutCurrentUser = asyncHandler(async(req,res) =>{
+  res.cookie("jwt"," ", {
+    httpOnly:true,
+    expires: new Date(0)
+  });
+
+  res.status(200).json({
+    message: "User logout successfully."
+  })
+});
+
+
+
+export {createUser,loginUser,logoutCurrentUser}
