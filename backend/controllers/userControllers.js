@@ -1,5 +1,5 @@
 import asyncHandler from "../middlewares/asyncHandler.js";
-import User from "../models/Usermodel.js";
+import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 
@@ -80,6 +80,9 @@ const logoutCurrentUser = asyncHandler(async(req,res) =>{
   })
 });
 
+const getAllUsers = asyncHandler(async(req,res) =>{
+  const allUsers = await User.find({});
+  res.status(201).json(allUsers);
+})
 
-
-export {createUser,loginUser,logoutCurrentUser}
+export {createUser,loginUser,logoutCurrentUser,getAllUsers}
