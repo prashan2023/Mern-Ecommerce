@@ -123,6 +123,70 @@ const updateCurrentUser = asyncHandler(async(req,res) =>{
   }else{
     res.status(404).send("User not found.")
   }
-})
+});
 
-export {createUser,loginUser,logoutCurrentUser,getAllUsers,currentUserProfile,updateCurrentUser}
+ 
+const deleteUser = asyncHandler(async(req,res)=>{
+  const findUser = await User.findById(req.params.id);
+  
+  if(findUser){
+    if(findUser.isAdmin){
+      res.status(400).send("Admin user can not be deleted.");
+    }else{
+      try {
+      await User.deleteOne(findUser._id);
+      res.send("User deleted successfully");
+    } catch (error) {
+      res.status(401);
+      throw new Error("Invalid User credentials.")
+    }
+  }
+   
+  }else{
+    res.status(404).send("User not found.");
+  }
+});
+
+const getUserProfile = asyncHandler(async(req,res) =>{
+  const getUser = await User.findById(req.params.id);
+
+  if(getUser){
+    try {
+      res.status(201).json({getUser});
+    } catch (error) {
+      res.status(401);
+      throw new Error({error: `${error.message}`})
+    }
+  }else{
+      res.status(404).send("User not found.")
+  }
+});
+
+const updateUserById = asyncHandler(async(req,res) =>{
+
+  try {
+    const updateUser = await User.findById(req.params.id);
+
+    if(updateUser){
+       updateUser.username = req.body.username||updateUser.username;
+       updateUser.email = req.body.email||updateUser.email;
+       if(req.body.password){
+          const salt = await bcrypt.genSalt(10);
+          const hashedpassword = await bcrypt.hash(req.body.password,salt);
+          updateUser.password = hashedpassword;
+        }
+
+      await updateUser.save();
+      res.status(201).json({updateUser});
+  }else{
+    res.status(401).send("Invalid user credentials.")
+  }
+
+  } catch (error) {
+    res.status(404);
+    throw new Error("User not found.")
+  }
+  
+});
+
+export {createUser,loginUser,logoutCurrentUser,getAllUsers,currentUserProfile,updateCurrentUser,deleteUser,getUserProfile,updateUserById}

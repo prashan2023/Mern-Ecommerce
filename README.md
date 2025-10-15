@@ -11,3 +11,8 @@
 - And create a getAllUsers controller.
 - Create getcurrentUserProfile route.
 - Create a updatecurrentUser profile.
+
+// Admin routes
+- Create a deleteUserById routes in Admin Side .
+- Create a getUserById routes in Admin Side.
+- Create a updateById routes in Admin Side.
