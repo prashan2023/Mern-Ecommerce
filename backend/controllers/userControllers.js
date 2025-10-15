@@ -13,7 +13,7 @@ const createUser = asyncHandler(async(req,res) =>{
 
     if(existingUser){
         res.status(401)
-        throw Error("Unautorized User credentials.");
+        throw Error("User Already exits.");
         return ;
     }
 
@@ -63,9 +63,11 @@ const loginUser = asyncHandler(async(req,res) =>{
                 throw new Error("Invalid User credential");
             }
           
+          }else{
+            res.status(401).send("Invalid User credential.")
           }
        }else{
-            res.status(400).send("Invalid User credentials.")
+          res.status(400).send("Invalid User credentials.")
        }
 });
 
@@ -82,7 +84,45 @@ const logoutCurrentUser = asyncHandler(async(req,res) =>{
 
 const getAllUsers = asyncHandler(async(req,res) =>{
   const allUsers = await User.find({});
-  res.status(201).json(allUsers);
+  res.status(201).json({allUsers});
+});
+
+const currentUserProfile = asyncHandler(async(req,res) =>{
+  const user = await User.findById(req.user._id);
+
+  if(user){
+    try {
+      res.status(201).json({user});
+    } catch (error) {
+      res.status(401);
+      throw new Error("Invalid User Credential.")
+    }
+  }else{
+    res.status(404).send("User not Found.");
+  }
+});
+
+const updateCurrentUser = asyncHandler(async(req,res) =>{
+  const currentUser = await User.findById(req.user._id);
+
+  if(currentUser){
+    try {
+      currentUser.username = req.body.username||currentUser.username;
+      currentUser.email = req.body.email||currentUser.email;
+      if(req.body.password){
+        const salt = await bcrypt.genSalt(10);
+        const hashedpassword = await bcrypt.hash(req.body.password,salt);
+        currentUser.password = hashedpassword;
+      };
+      await currentUser.save();
+      res.status(201).json({currentUser});
+    }catch (error) {
+      res.status(401);
+      throw new Error("Invalid User credential.")
+    }
+  }else{
+    res.status(404).send("User not found.")
+  }
 })
 
-export {createUser,loginUser,logoutCurrentUser,getAllUsers}
+export {createUser,loginUser,logoutCurrentUser,getAllUsers,currentUserProfile,updateCurrentUser}

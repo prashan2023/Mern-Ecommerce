@@ -9,3 +9,5 @@
 - loginUser and Logout User logic implementation is successully created.
 - create a authendicate middleware and authorizeAdmin middleware.
 - And create a getAllUsers controller.
+- Create getcurrentUserProfile route.
+- Create a updatecurrentUser profile.
